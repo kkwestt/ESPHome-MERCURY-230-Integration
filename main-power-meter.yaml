@@ -1,0 +1,168 @@
+substitutions:
+  friendly_name: "MAIN Power Meter"
+  sensor_update_interval: 10s
+
+esphome:
+  name: main-power-meter
+  friendly_name: ${friendly_name}
+
+esp8266:
+  board: d1_mini
+  restore_from_flash: true
+
+packages:
+  common: !include main_config.yaml 
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [energy_meter_mercury230]
+    refresh: 0s
+
+web_server:
+  port: 80
+  version: 3
+  log: true
+  local: true 
+
+uart:
+  id: uart_bus
+  tx_pin: GPIO4
+  rx_pin: GPIO5
+  baud_rate: 9600
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+
+light:
+  - platform: monochromatic
+    name: Blue LED
+    id: led
+    output: blue_led
+    internal: true
+    effects:
+      - pulse:
+
+output:
+  - platform: esp8266_pwm
+    id: blue_led
+    pin: GPIO2
+    inverted: False
+
+sensor:
+  - platform: energy_meter_mercury230
+    uart_id: uart_bus
+    update_interval: ${sensor_update_interval} 
+    # !!!
+    # Адрес счетчика (необязательно; если не указан - будет найден автоматически)
+    # !!!
+    use_address: 28
+    # Пароль (необязательно; дефолтный пароль пользователя: 111111, админа 222222)
+    # password: "111111"
+    
+    # Напряжение по трём фазам
+    voltage_a:
+      name: "Voltage A"
+      icon: mdi:lightning-bolt
+      accuracy_decimals: 0
+    voltage_b:
+      name: "Voltage B"
+      icon: mdi:lightning-bolt
+      accuracy_decimals: 0
+    voltage_c:
+      name: "Voltage C"
+      icon: mdi:lightning-bolt
+      accuracy_decimals: 0
+
+    # Токи
+    current_summ:
+      name: "Current Total"
+      icon: mdi:current-ac
+    current_a:
+      name: "Current A"
+      icon: mdi:current-ac
+    current_b:
+      name: "Current B"
+      icon: mdi:current-ac
+    current_c:
+      name: "Current C"
+      icon: mdi:current-ac
+
+    # Мощности
+    power_summ:
+      name: "Power Total"
+      icon: mdi:flash
+      accuracy_decimals: 0
+    power_a:
+      name: "Power A"
+      icon: mdi:flash
+      accuracy_decimals: 0
+    power_b:
+      name: "Power B"
+      icon: mdi:flash
+      accuracy_decimals: 0
+    power_c:
+      name: "Power C"
+      icon: mdi:flash
+      accuracy_decimals: 0
+
+    # Коэффициенты мощности
+    power_factor_a:
+      name: "Power Factor A"
+      icon: mdi:cosine-wave
+    power_factor_b:
+      name: "Power Factor B"
+      icon: mdi:cosine-wave
+    power_factor_c:
+      name: "Power Factor C"
+      icon: mdi:cosine-wave
+
+    # Показания (активная и реактивная энергия по фазам)
+    energy_aa:
+      name: "Energy A Active"
+    energy_ra:
+      name: "Energy A Reactive"
+    energy_ab:
+      name: "Energy B Active"
+    energy_rb:
+      name: "Energy B Reactive"
+    energy_ac:
+      name: "Energy C Active"
+    energy_rc:
+      name: "Energy C Reactive"
+
+    # Энергия по тарифам
+    energy_t1_active:
+      name: "Energy T1"
+      icon: mdi:counter
+      accuracy_decimals: 0
+    energy_t2_active:
+      name: "Energy T2"
+      icon: mdi:counter
+      accuracy_decimals: 0 
+    energy_t3_active:
+      name: "Energy T3" 
+
+    # Температура внутри корпуса счётчика
+    internal_temperature:
+      name: "Meter Temperature"
+
+    # Частота сети
+    frequency:
+      name: "Frequency"
+      icon: mdi:sine-wave
+
+    # Информация об устройстве
+    serial_number:
+      name: "Serial Number"
+      icon: mdi:identifier
+    firmware_version:
+      name: "Firmware Version"
+      icon: mdi:chip
+    connect_status:
+      name: "Connection Status"
+      icon: mdi:connection
+    date_fabricate:
+      name: "Manufacturing Date"
+      icon: mdi:calendar-clock
